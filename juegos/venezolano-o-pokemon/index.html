@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¿Venezolano o Pokémon?</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .game-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+        .word-display {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #333;
+            margin: 1.5rem 0;
+            min-height: 60px;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        button {
+            padding: 12px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+            font-weight: bold;
+        }
+        button:active { transform: scale(0.95); }
+        .btn-venezolano { background-color: #ffcc00; color: #333; }
+        .btn-pokemon { background-color: #ef5350; color: white; }
+        .score { font-size: 1.1rem; color: #666; margin-top: 1rem; }
+        .result { font-size: 1.2rem; font-weight: bold; margin-top: 1rem; min-height: 30px; }
+        .correct { color: #4caf50; }
+        .incorrect { color: #f44336; }
+    </style>
+</head>
+<body>
+
+<div class="game-card">
+    <h1>¿Venezolano o Pokémon?</h1>
+    <div class="word-display" id="word">Cargando...</div>
+    
+    <div class="btn-group">
+        <button class="btn-venezolano" onclick="checkAnswer('venezolano')">Venezolano 🇻🇪</button>
+        <button class="btn-pokemon" onclick="checkAnswer('pokemon')">Pokémon 🔴</button>
+    </div>
+
+    <div class="result" id="result"></div>
+    <div class="score">Puntuación: <span id="score">0</span></div>
+</div>
+
+<script>
+    // Banco de datos con nombres reales raros de Venezuela y Pokémon reales
+    const database = [
+        // Venezolanos
+        { name: "Usnavy", type: "venezolano" },
+        { name: "Yubiritzaida", type: "venezolano" },
+        { name: "Yonisley", type: "venezolano" },
+        { name: "Taj-Mahal", type: "venezolano" },
+        { name: "Kerveros", type: "venezolano" },
+        { name: "Iloveu", type: "venezolano" },
+        { name: "Winesmer", type: "venezolano" },
+        { name: "Maolenin", type: "venezolano" },
+        { name: "Superman", type: "venezolano" },
+        { name: "Grendelstein", type: "venezolano" },
+        
+        // Pokémon
+        { name: "Zacian", type: "pokemon" },
+        { name: "Rayquaza", type: "pokemon" },
+        { name: "Skuntank", type: "pokemon" },
+        { name: "Gurdurr", type: "pokemon" },
+        { name: "Xurkitree", type: "pokemon" },
+        { name: "Bunnelby", type: "pokemon" },
+        { name: "Sigilyph", type: "pokemon" },
+        { name: "Probopass", type: "pokemon" },
+        { name: "Blacephalon", type: "pokemon" },
+        { name: "Smeargle", type: "pokemon" }
+    ];
+
+    let currentItem = {};
+    let score = 0;
+
+    function nextQuestion() {
+        document.getElementById('result').textContent = '';
+        const randomIndex = Math.floor(Math.random() * database.length);
+        currentItem = database[randomIndex];
+        document.getElementById('word').textContent = currentItem.name;
+    }
+
+    function checkAnswer(userChoice) {
+        const resultDiv = document.getElementById('result');
+        if (userChoice === currentItem.type) {
+            score++;
+            resultDiv.textContent = "¡Correcto! 🎉";
+            resultDiv.className = "result correct";
+        } else {
+            resultDiv.textContent = `¡Incorrecto! Era ${currentItem.type}. ❌`;
+            resultDiv.className = "result incorrect";
+        }
+        document.getElementById('score').textContent = score;
+        setTimeout(nextQuestion, 1200);
+    }
+
+    // Iniciar el juego
+    nextQuestion();
+</script>
+
+</body>
+</html>
