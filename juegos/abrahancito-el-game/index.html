@@ -17,7 +17,7 @@
             padding: 10px;
             margin: 0;
         }
-        h1 { margin-bottom: 10px; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        h1 { margin-bottom: 10px; color: #fff; }
         #game-container {
             position: relative;
             border: 6px solid #ffd700;
@@ -27,9 +27,8 @@
             max-width: 800px;
             aspect-ratio: 800 / 500;
             background: linear-gradient(180deg, #87CEEB 0%, #90EE90 50%, #8B7355 100%);
-            overflow: hidden;
         }
-        canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+        canvas { display: block; width: 100%; height: 100%; }
         #dialog-box {
             position: absolute;
             bottom: 15px;
@@ -39,30 +38,27 @@
             border: 3px solid #ffd700;
             border-radius: 10px;
             padding: 15px;
-            font-size: 14px;
             display: none;
             color: #fff;
             z-index: 10;
         }
-        .controls-info { margin-top: 15px; font-size: 0.9rem; color: #fff; text-align: center; }
+        .info { margin-top: 15px; font-size: 0.9rem; color: #fff; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; }
         .mobile-controls { display: none; gap: 10px; margin-top: 15px; width: 100%; max-width: 800px; flex-direction: column; align-items: center; }
         .dpad { display: grid; grid-template-columns: repeat(3, 60px); grid-template-rows: repeat(3, 60px); gap: 5px; }
-        .dpad button { background: linear-gradient(135deg, #667eea, #764ba2); border: 3px solid #ffd700; color: white; font-size: 1.5rem; border-radius: 10px; cursor: pointer; }
-        .dpad button:active { transform: scale(0.95); }
+        .dpad button { background: #667eea; border: 3px solid #ffd700; color: white; font-size: 1.5rem; border-radius: 10px; cursor: pointer; }
         .dpad button:nth-child(2) { grid-column: 2; grid-row: 1; }
         .dpad button:nth-child(4) { grid-column: 1; grid-row: 2; }
         .dpad button:nth-child(5) { grid-column: 2; grid-row: 2; visibility: hidden; }
         .dpad button:nth-child(6) { grid-column: 3; grid-row: 2; }
         .dpad button:nth-child(8) { grid-column: 2; grid-row: 3; }
-        .action-buttons { display: flex; gap: 10px; justify-content: center; width: 100%; flex-wrap: wrap; margin-top: 10px; }
-        .action-buttons button { background: linear-gradient(135deg, #f093fb, #f5576c); color: white; border: 3px solid #ffd700; padding: 12px 20px; border-radius: 8px; cursor: pointer; }
-        .btn-panel { display: flex; gap: 10px; justify-content: center; margin-top: 15px; flex-wrap: wrap; width: 100%; max-width: 800px; }
-        .btn-panel button { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: 3px solid #ffd700; padding: 12px 20px; border-radius: 8px; cursor: pointer; }
-        .btn-panel button.reset { background: linear-gradient(135deg, #f5576c, #f093fb); }
+        .btns { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; justify-content: center; }
+        .btns button { background: #667eea; color: white; border: 3px solid #ffd700; padding: 12px 20px; border-radius: 8px; cursor: pointer; }
+        .btns button.reset { background: #f5576c; }
     </style>
 </head>
 <body>
-    <h1>🤠 Abrahancito: La Leyenda 🤠</h1>
+    <h1>🤠 Abrahancito 🤠</h1>
+    <div class="info">👿 Enemigos: <span id="enemyCount">2</span> | 💪 Derrotados: <span id="defeatedCount">0</span></div>
     <div id="game-container">
         <canvas id="gameCanvas" width="800" height="500"></canvas>
         <div id="dialog-box">
@@ -70,7 +66,7 @@
             <p id="npc-text" style="margin: 8px 0 0 0;"></p>
         </div>
     </div>
-    <div class="controls-info" id="desktop-info">🎮 Moverse: Flechas/WASD | 💬 Hablar: E</div>
+    <div class="info" id="desktop-info">⚔️ Choca con enemigos para derrotarlos | E = Hablar</div>
     <div class="mobile-controls" id="mobileControls">
         <div class="dpad">
             <button id="btnUp">↑</button>
@@ -78,11 +74,8 @@
             <button id="btnRight">→</button>
             <button id="btnDown">↓</button>
         </div>
-        <div class="action-buttons">
-            <button id="btnTalk">💬 Hablar</button>
-        </div>
     </div>
-    <div class="btn-panel">
+    <div class="btns">
         <button onclick="saveGame()">💾 Guardar</button>
         <button class="reset" onclick="resetGame()">🔄 Reiniciar</button>
     </div>
@@ -90,130 +83,95 @@
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const dialogBox = document.getElementById('dialog-box');
-        const npcNameEl = document.getElementById('npc-name');
-        const npcTextEl = document.getElementById('npc-text');
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent);
         if (isMobile) document.getElementById('mobileControls').style.display = 'flex';
 
-        let player = { x: 100, y: 400, size: 40, speed: 3, emoji: '🤠' };
+        let player = { x: 100, y: 400, emoji: '🤠' };
+        let villains = [
+            { x: 400, y: 250, emoji: '👿', defeated: false },
+            { x: 300, y: 350, emoji: '🤡', defeated: false }
+        ];
+        let defeated = 0;
         const keys = {};
-        const mobileKeys = {};
 
-        const npcs = [
-            { name: "🧙 Anciano", x: 200, y: 150, emoji: '🧙‍♂️', dialog: "Hola! La aldea te necesita." },
-            { name: "👨 Granjero", x: 500, y: 380, emoji: '👨‍🌾', dialog: "Ten cuidado en el bosque." },
-            { name: "🧝 Elfa", x: 650, y: 200, emoji: '🧝‍♀️', dialog: "Bienvenido a nuestro reino." }
-        ];
-
-        const trees = [
-            { x: 50, y: 100, emoji: '🌳' },
-            { x: 750, y: 80, emoji: '🌳' },
-            { x: 150, y: 450, emoji: '🌲' },
-            { x: 700, y: 420, emoji: '🌲' },
-            { x: 600, y: 100, emoji: '🌴' }
-        ];
-
-        const decorations = [
-            { x: 550, y: 350, emoji: '⛺' },
-            { x: 450, y: 450, emoji: '🏠' },
-            { x: 250, y: 380, emoji: '🪨' }
-        ];
-
-        let currentNPC = null;
-
-        window.addEventListener('keydown', e => {
-            keys[e.key.toLowerCase()] = true;
-            if (e.key.toLowerCase() === 'e') interactNPC();
-        });
-
-        window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+        window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
+        window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
 
         if (isMobile) {
-            document.getElementById('btnUp').addEventListener('touchstart', e => { e.preventDefault(); mobileKeys['up'] = true; });
-            document.getElementById('btnUp').addEventListener('touchend', e => { e.preventDefault(); mobileKeys['up'] = false; });
-            document.getElementById('btnDown').addEventListener('touchstart', e => { e.preventDefault(); mobileKeys['down'] = true; });
-            document.getElementById('btnDown').addEventListener('touchend', e => { e.preventDefault(); mobileKeys['down'] = false; });
-            document.getElementById('btnLeft').addEventListener('touchstart', e => { e.preventDefault(); mobileKeys['left'] = true; });
-            document.getElementById('btnLeft').addEventListener('touchend', e => { e.preventDefault(); mobileKeys['left'] = false; });
-            document.getElementById('btnRight').addEventListener('touchstart', e => { e.preventDefault(); mobileKeys['right'] = true; });
-            document.getElementById('btnRight').addEventListener('touchend', e => { e.preventDefault(); mobileKeys['right'] = false; });
-            document.getElementById('btnTalk').addEventListener('touchstart', e => { e.preventDefault(); interactNPC(); });
-        }
-
-        function updatePlayer() {
-            if (keys['arrowup'] || keys['w'] || mobileKeys['up']) player.y -= player.speed;
-            if (keys['arrowdown'] || keys['s'] || mobileKeys['down']) player.y += player.speed;
-            if (keys['arrowleft'] || keys['a'] || mobileKeys['left']) player.x -= player.speed;
-            if (keys['arrowright'] || keys['d'] || mobileKeys['right']) player.x += player.speed;
-
-            player.x = Math.max(0, Math.min(canvas.width - player.size, player.x));
-            player.y = Math.max(0, Math.min(canvas.height - player.size, player.y));
-
-            currentNPC = null;
-            npcs.forEach(npc => {
-                let dx = (player.x + player.size/2) - (npc.x + 20);
-                let dy = (player.y + player.size/2) - (npc.y + 20);
-                if (Math.sqrt(dx * dx + dy * dy) < 60 && !currentNPC) currentNPC = npc;
+            ['btnUp', 'btnDown', 'btnLeft', 'btnRight'].forEach(id => {
+                const btn = document.getElementById(id);
+                btn.addEventListener('touchstart', e => { e.preventDefault(); keys[{btnUp: 'w', btnDown: 's', btnLeft: 'a', btnRight: 'd'}[id]] = true; });
+                btn.addEventListener('touchend', e => { e.preventDefault(); keys[{btnUp: 'w', btnDown: 's', btnLeft: 'a', btnRight: 'd'}[id]] = false; });
             });
-            if (!currentNPC) dialogBox.style.display = 'none';
         }
 
-        function interactNPC() {
-            if (currentNPC) {
-                npcNameEl.textContent = currentNPC.name;
-                npcTextEl.textContent = currentNPC.dialog;
-                dialogBox.style.display = 'block';
-            }
+        function update() {
+            if (keys['arrowup'] || keys['w']) player.y -= 3;
+            if (keys['arrowdown'] || keys['s']) player.y += 3;
+            if (keys['arrowleft'] || keys['a']) player.x -= 3;
+            if (keys['arrowright'] || keys['d']) player.x += 3;
+
+            player.x = Math.max(0, Math.min(760, player.x));
+            player.y = Math.max(0, Math.min(460, player.y));
+
+            villains.forEach(v => {
+                if (!v.defeated && Math.hypot(player.x - v.x, player.y - v.y) < 50) {
+                    v.defeated = true;
+                    defeated++;
+                    document.getElementById('defeatedCount').textContent = defeated;
+                    document.getElementById('enemyCount').textContent = villains.filter(x => !x.defeated).length;
+                }
+            });
         }
 
         function draw() {
-            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-            gradient.addColorStop(0, '#87CEEB');
-            gradient.addColorStop(0.5, '#90EE90');
-            gradient.addColorStop(1, '#8B7355');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            trees.forEach(t => { ctx.font = '40px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(t.emoji, t.x, t.y); });
-            decorations.forEach(d => { ctx.font = '35px Arial'; ctx.fillText(d.emoji, d.x, d.y); });
-            npcs.forEach(n => { ctx.font = '35px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(n.emoji, n.x, n.y); });
+            ctx.fillStyle = '#90EE90';
+            ctx.fillRect(0, 0, 800, 500);
+            
+            ctx.font = '40px Arial';
+            ctx.textAlign = 'center';
+            const trees = [[50, 100], [750, 80], [150, 450], [700, 420], [600, 100]];
+            trees.forEach(t => ctx.fillText('🌳', t[0], t[1]));
+            
+            [[550, 350], [450, 450], [250, 380]].forEach(d => ctx.fillText('⛺', d[0], d[1]));
+            [[200, 150], [500, 380], [650, 200]].forEach(p => ctx.fillText('🧙‍♂️', p[0], p[1]));
+            
+            villains.forEach(v => {
+                if (!v.defeated) ctx.fillText(v.emoji, v.x, v.y);
+            });
             
             ctx.font = '50px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(player.emoji, player.x + player.size/2, player.y + player.size/2);
+            ctx.fillText(player.emoji, player.x, player.y);
         }
 
         function gameLoop() {
-            updatePlayer();
+            update();
             draw();
             requestAnimationFrame(gameLoop);
         }
 
         function saveGame() {
-            localStorage.setItem('abrahancito_save', JSON.stringify({ x: player.x, y: player.y }));
+            localStorage.setItem('abrahancito', JSON.stringify({x: player.x, y: player.y, defeated}));
             alert('Guardado! 💾');
         }
 
-        function loadGame() {
-            const data = localStorage.getItem('abrahancito_save');
-            if (data) {
-                const save = JSON.parse(data);
-                player.x = save.x;
-                player.y = save.y;
-            }
-        }
-
         function resetGame() {
-            localStorage.removeItem('abrahancito_save');
-            player.x = 100;
-            player.y = 400;
-            dialogBox.style.display = 'none';
+            localStorage.removeItem('abrahancito');
+            player = { x: 100, y: 400, emoji: '🤠' };
+            villains.forEach(v => v.defeated = false);
+            defeated = 0;
+            document.getElementById('defeatedCount').textContent = '0';
+            document.getElementById('enemyCount').textContent = '2';
         }
 
-        loadGame();
+        const saved = JSON.parse(localStorage.getItem('abrahancito') || '{}');
+        if (saved.x) {
+            player.x = saved.x;
+            player.y = saved.y;
+            defeated = saved.defeated || 0;
+            document.getElementById('defeatedCount').textContent = defeated;
+        }
+
         gameLoop();
     </script>
 </body>
