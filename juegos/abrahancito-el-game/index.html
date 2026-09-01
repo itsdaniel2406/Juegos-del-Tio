@@ -5,194 +5,72 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Abrahancito</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            background-color: #1a1a1a;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            font-family: 'Courier New', Courier, monospace;
+            font-family: Arial, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
             padding: 10px;
+            margin: 0;
         }
-
-        h1 { 
-            margin-bottom: 10px; 
-            color: #f1c40f; 
-            font-size: clamp(1.5rem, 5vw, 2.5rem);
-        }
-
+        h1 { margin-bottom: 10px; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
         #game-container {
             position: relative;
-            border: 4px solid #fff;
-            border-radius: 8px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+            border: 6px solid #ffd700;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
             width: 100%;
-            max-width: 600px;
-            aspect-ratio: 600 / 400;
+            max-width: 800px;
+            aspect-ratio: 800 / 500;
+            background: linear-gradient(180deg, #87CEEB 0%, #90EE90 50%, #8B7355 100%);
+            overflow: hidden;
         }
-
-        canvas {
-            background-color: #27ae60;
-            display: block;
-            width: 100%;
-            height: 100%;
-            border-radius: 4px;
-            touch-action: none;
-        }
-
+        canvas { display: block; width: 100%; height: 100%; touch-action: none; }
         #dialog-box {
             position: absolute;
-            bottom: 10px;
-            left: 10px;
-            right: 10px;
-            background: rgba(0, 0, 0, 0.85);
-            border: 2px solid #fff;
-            border-radius: 6px;
-            padding: 12px;
-            font-size: clamp(12px, 3vw, 14px);
+            bottom: 15px;
+            left: 15px;
+            right: 15px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 3px solid #ffd700;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 14px;
             display: none;
             color: #fff;
             z-index: 10;
         }
-
-        .controls-info {
-            margin-top: 15px;
-            font-size: clamp(0.75rem, 2.5vw, 0.9rem);
-            color: #ccc;
-            text-align: center;
-        }
-
-        .mobile-controls {
-            display: none;
-            gap: 10px;
-            margin-top: 15px;
-            width: 100%;
-            max-width: 600px;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .dpad {
-            display: grid;
-            grid-template-columns: repeat(3, 60px);
-            grid-template-rows: repeat(3, 60px);
-            gap: 5px;
-            margin: 0 auto;
-        }
-
-        .dpad button {
-            background: #2980b9;
-            border: 2px solid #fff;
-            color: white;
-            font-size: 1.2rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.1s;
-            touch-action: manipulation;
-        }
-
-        .dpad button:active {
-            background: #3498db;
-            transform: scale(0.95);
-        }
-
+        .controls-info { margin-top: 15px; font-size: 0.9rem; color: #fff; text-align: center; }
+        .mobile-controls { display: none; gap: 10px; margin-top: 15px; width: 100%; max-width: 800px; flex-direction: column; align-items: center; }
+        .dpad { display: grid; grid-template-columns: repeat(3, 60px); grid-template-rows: repeat(3, 60px); gap: 5px; }
+        .dpad button { background: linear-gradient(135deg, #667eea, #764ba2); border: 3px solid #ffd700; color: white; font-size: 1.5rem; border-radius: 10px; cursor: pointer; }
+        .dpad button:active { transform: scale(0.95); }
         .dpad button:nth-child(2) { grid-column: 2; grid-row: 1; }
         .dpad button:nth-child(4) { grid-column: 1; grid-row: 2; }
         .dpad button:nth-child(5) { grid-column: 2; grid-row: 2; visibility: hidden; }
         .dpad button:nth-child(6) { grid-column: 3; grid-row: 2; }
         .dpad button:nth-child(8) { grid-column: 2; grid-row: 3; }
-
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            width: 100%;
-            flex-wrap: wrap;
-        }
-
-        .action-buttons button {
-            background: #27ae60;
-            color: white;
-            border: 2px solid #fff;
-            padding: 12px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-family: inherit;
-            font-weight: bold;
-            font-size: clamp(0.9rem, 2.5vw, 1rem);
-            transition: all 0.1s;
-            touch-action: manipulation;
-        }
-
-        .action-buttons button:active {
-            background: #2ecc71;
-            transform: scale(0.95);
-        }
-
-        .btn-panel {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-top: 10px;
-            flex-wrap: wrap;
-            width: 100%;
-            max-width: 600px;
-        }
-
-        .btn-panel button {
-            background: #2980b9;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-family: inherit;
-            font-weight: bold;
-            font-size: clamp(0.8rem, 2vw, 1rem);
-        }
-
-        .btn-panel button:active { transform: scale(0.95); }
-        .btn-panel button.reset { background: #c0392b; }
-        .btn-panel button.reset:active { background: #e74c3c; }
-
-        @media (max-width: 768px) {
-            .dpad {
-                grid-template-columns: repeat(3, 50px);
-                grid-template-rows: repeat(3, 50px);
-                gap: 3px;
-            }
-
-            .dpad button {
-                font-size: 1rem;
-            }
-        }
+        .action-buttons { display: flex; gap: 10px; justify-content: center; width: 100%; flex-wrap: wrap; margin-top: 10px; }
+        .action-buttons button { background: linear-gradient(135deg, #f093fb, #f5576c); color: white; border: 3px solid #ffd700; padding: 12px 20px; border-radius: 8px; cursor: pointer; }
+        .btn-panel { display: flex; gap: 10px; justify-content: center; margin-top: 15px; flex-wrap: wrap; width: 100%; max-width: 800px; }
+        .btn-panel button { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: 3px solid #ffd700; padding: 12px 20px; border-radius: 8px; cursor: pointer; }
+        .btn-panel button.reset { background: linear-gradient(135deg, #f5576c, #f093fb); }
     </style>
 </head>
 <body>
-
-    <h1>Abrahancito: La Leyenda</h1>
-    
+    <h1>🤠 Abrahancito: La Leyenda 🤠</h1>
     <div id="game-container">
-        <canvas id="gameCanvas" width="600" height="400"></canvas>
+        <canvas id="gameCanvas" width="800" height="500"></canvas>
         <div id="dialog-box">
-            <strong id="npc-name" style="color: #f39c12;"></strong>
-            <p id="npc-text" style="margin: 5px 0 0 0;"></p>
+            <strong id="npc-name" style="color: #ffd700;"></strong>
+            <p id="npc-text" style="margin: 8px 0 0 0;"></p>
         </div>
     </div>
-
-    <div class="controls-info" id="desktop-info">
-        Moverse: <b>Flechas / WASD</b> | Hablar: <b>E</b> (cerca de un NPC)
-    </div>
-
+    <div class="controls-info" id="desktop-info">🎮 Moverse: Flechas/WASD | 💬 Hablar: E</div>
     <div class="mobile-controls" id="mobileControls">
         <div class="dpad">
             <button id="btnUp">↑</button>
@@ -201,182 +79,142 @@
             <button id="btnDown">↓</button>
         </div>
         <div class="action-buttons">
-            <button id="btnTalk">💬 Hablar (E)</button>
+            <button id="btnTalk">💬 Hablar</button>
         </div>
     </div>
-
     <div class="btn-panel">
-        <button onclick="saveGame()">Guardar Partida 💾</button>
-        <button class="reset" onclick="resetGame()">Reiniciar Partida 🔄</button>
+        <button onclick="saveGame()">💾 Guardar</button>
+        <button class="reset" onclick="resetGame()">🔄 Reiniciar</button>
     </div>
 
-<script>
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    const dialogBox = document.getElementById('dialog-box');
-    const npcNameEl = document.getElementById('npc-name');
-    const npcTextEl = document.getElementById('npc-text');
-    const mobileControls = document.getElementById('mobileControls');
-    const desktopInfo = document.getElementById('desktop-info');
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const dialogBox = document.getElementById('dialog-box');
+        const npcNameEl = document.getElementById('npc-name');
+        const npcTextEl = document.getElementById('npc-text');
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isMobile) document.getElementById('mobileControls').style.display = 'flex';
 
-    if (isMobile) {
-        mobileControls.style.display = 'flex';
-        desktopInfo.style.display = 'none';
-    }
+        let player = { x: 100, y: 400, size: 40, speed: 3, emoji: '🤠' };
+        const keys = {};
+        const mobileKeys = {};
 
-    let player = {
-        x: 100,
-        y: 100,
-        size: 24,
-        speed: 3,
-        color: '#3498db'
-    };
+        const npcs = [
+            { name: "🧙 Anciano", x: 200, y: 150, emoji: '🧙‍♂️', dialog: "Hola! La aldea te necesita." },
+            { name: "👨 Granjero", x: 500, y: 380, emoji: '👨‍🌾', dialog: "Ten cuidado en el bosque." },
+            { name: "🧝 Elfa", x: 650, y: 200, emoji: '🧝‍♀️', dialog: "Bienvenido a nuestro reino." }
+        ];
 
-    const keys = {};
-    const mobileKeys = {};
+        const trees = [
+            { x: 50, y: 100, emoji: '🌳' },
+            { x: 750, y: 80, emoji: '🌳' },
+            { x: 150, y: 450, emoji: '🌲' },
+            { x: 700, y: 420, emoji: '🌲' },
+            { x: 600, y: 100, emoji: '🌴' }
+        ];
 
-    const npcs = [
-        {
-            name: "Anciano sabio",
-            x: 250,
-            y: 150,
-            size: 24,
-            color: '#e67e22',
-            dialog: "¡Hola Abrahancito! Si quieres salvar la aldea, guarda tu progreso seguido."
-        },
-        {
-            name: "Guardia Real",
-            x: 450,
-            y: 280,
-            size: 24,
-            color: '#9b59b6',
-            dialog: "El camino del norte es peligroso. Ten cuidado."
+        const decorations = [
+            { x: 550, y: 350, emoji: '⛺' },
+            { x: 450, y: 450, emoji: '🏠' },
+            { x: 250, y: 380, emoji: '🪨' }
+        ];
+
+        let currentNPC = null;
+
+        window.addEventListener('keydown', e => {
+            keys[e.key.toLowerCase()] = true;
+            if (e.key.toLowerCase() === 'e') interactNPC();
+        });
+
+        window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+
+        if (isMobile) {
+            document.getElementById('btnUp').addEventListener('touchstart', e => { e.preventDefault(); mobileKeys['up'] = true; });
+            document.getElementById('btnUp').addEventListener('touchend', e => { e.preventDefault(); mobileKeys['up'] = false; });
+            document.getElementById('btnDown').addEventListener('touchstart', e => { e.preventDefault(); mobileKeys['down'] = true; });
+            document.getElementById('btnDown').addEventListener('touchend', e => { e.preventDefault(); mobileKeys['down'] = false; });
+            document.getElementById('btnLeft').addEventListener('touchstart', e => { e.preventDefault(); mobileKeys['left'] = true; });
+            document.getElementById('btnLeft').addEventListener('touchend', e => { e.preventDefault(); mobileKeys['left'] = false; });
+            document.getElementById('btnRight').addEventListener('touchstart', e => { e.preventDefault(); mobileKeys['right'] = true; });
+            document.getElementById('btnRight').addEventListener('touchend', e => { e.preventDefault(); mobileKeys['right'] = false; });
+            document.getElementById('btnTalk').addEventListener('touchstart', e => { e.preventDefault(); interactNPC(); });
         }
-    ];
 
-    let currentNPC = null;
+        function updatePlayer() {
+            if (keys['arrowup'] || keys['w'] || mobileKeys['up']) player.y -= player.speed;
+            if (keys['arrowdown'] || keys['s'] || mobileKeys['down']) player.y += player.speed;
+            if (keys['arrowleft'] || keys['a'] || mobileKeys['left']) player.x -= player.speed;
+            if (keys['arrowright'] || keys['d'] || mobileKeys['right']) player.x += player.speed;
 
-    window.addEventListener('keydown', e => {
-        keys[e.key.toLowerCase()] = true;
-        if (e.key.toLowerCase() === 'e') {
-            interactNPC();
+            player.x = Math.max(0, Math.min(canvas.width - player.size, player.x));
+            player.y = Math.max(0, Math.min(canvas.height - player.size, player.y));
+
+            currentNPC = null;
+            npcs.forEach(npc => {
+                let dx = (player.x + player.size/2) - (npc.x + 20);
+                let dy = (player.y + player.size/2) - (npc.y + 20);
+                if (Math.sqrt(dx * dx + dy * dy) < 60 && !currentNPC) currentNPC = npc;
+            });
+            if (!currentNPC) dialogBox.style.display = 'none';
         }
-    });
 
-    window.addEventListener('keyup', e => {
-        keys[e.key.toLowerCase()] = false;
-    });
-
-    if (isMobile) {
-        document.getElementById('btnUp').addEventListener('touchstart', (e) => { e.preventDefault(); mobileKeys['up'] = true; });
-        document.getElementById('btnUp').addEventListener('touchend', (e) => { e.preventDefault(); mobileKeys['up'] = false; });
-        
-        document.getElementById('btnDown').addEventListener('touchstart', (e) => { e.preventDefault(); mobileKeys['down'] = true; });
-        document.getElementById('btnDown').addEventListener('touchend', (e) => { e.preventDefault(); mobileKeys['down'] = false; });
-        
-        document.getElementById('btnLeft').addEventListener('touchstart', (e) => { e.preventDefault(); mobileKeys['left'] = true; });
-        document.getElementById('btnLeft').addEventListener('touchend', (e) => { e.preventDefault(); mobileKeys['left'] = false; });
-        
-        document.getElementById('btnRight').addEventListener('touchstart', (e) => { e.preventDefault(); mobileKeys['right'] = true; });
-        document.getElementById('btnRight').addEventListener('touchend', (e) => { e.preventDefault(); mobileKeys['right'] = false; });
-
-        document.getElementById('btnTalk').addEventListener('touchstart', (e) => { e.preventDefault(); interactNPC(); });
-    }
-
-    function updatePlayer() {
-        if (keys['arrowup'] || keys['w'] || mobileKeys['up']) { player.y -= player.speed; }
-        if (keys['arrowdown'] || keys['s'] || mobileKeys['down']) { player.y += player.speed; }
-        if (keys['arrowleft'] || keys['a'] || mobileKeys['left']) { player.x -= player.speed; }
-        if (keys['arrowright'] || keys['d'] || mobileKeys['right']) { player.x += player.speed; }
-
-        player.x = Math.max(0, Math.min(canvas.width - player.size, player.x));
-        player.y = Math.max(0, Math.min(canvas.height - player.size, player.y));
-
-        checkNPCDistance();
-    }
-
-    function checkNPCDistance() {
-        currentNPC = null;
-        for (let npc of npcs) {
-            let dx = (player.x + player.size/2) - (npc.x + npc.size/2);
-            let dy = (player.y + player.size/2) - (npc.y + npc.size/2);
-            let distance = Math.sqrt(dx * dx + dy * dy);
-
-            if (distance < 45) {
-                currentNPC = npc;
-                break;
+        function interactNPC() {
+            if (currentNPC) {
+                npcNameEl.textContent = currentNPC.name;
+                npcTextEl.textContent = currentNPC.dialog;
+                dialogBox.style.display = 'block';
             }
         }
 
-        if (!currentNPC) {
+        function draw() {
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#87CEEB');
+            gradient.addColorStop(0.5, '#90EE90');
+            gradient.addColorStop(1, '#8B7355');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            trees.forEach(t => { ctx.font = '40px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(t.emoji, t.x, t.y); });
+            decorations.forEach(d => { ctx.font = '35px Arial'; ctx.fillText(d.emoji, d.x, d.y); });
+            npcs.forEach(n => { ctx.font = '35px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(n.emoji, n.x, n.y); });
+            
+            ctx.font = '50px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(player.emoji, player.x + player.size/2, player.y + player.size/2);
+        }
+
+        function gameLoop() {
+            updatePlayer();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function saveGame() {
+            localStorage.setItem('abrahancito_save', JSON.stringify({ x: player.x, y: player.y }));
+            alert('Guardado! 💾');
+        }
+
+        function loadGame() {
+            const data = localStorage.getItem('abrahancito_save');
+            if (data) {
+                const save = JSON.parse(data);
+                player.x = save.x;
+                player.y = save.y;
+            }
+        }
+
+        function resetGame() {
+            localStorage.removeItem('abrahancito_save');
+            player.x = 100;
+            player.y = 400;
             dialogBox.style.display = 'none';
         }
-    }
 
-    function interactNPC() {
-        if (currentNPC) {
-            npcNameEl.textContent = currentNPC.name;
-            npcTextEl.textContent = currentNPC.dialog;
-            dialogBox.style.display = 'block';
-        }
-    }
-
-    function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        npcs.forEach(npc => {
-            ctx.fillStyle = npc.color;
-            ctx.fillRect(npc.x, npc.y, npc.size, npc.size);
-            
-            ctx.fillStyle = '#fff';
-            ctx.font = '10px Arial';
-            ctx.fillText(npc.name, npc.x - 10, npc.y - 5);
-        });
-
-        ctx.fillStyle = player.color;
-        ctx.fillRect(player.x, player.y, player.size, player.size);
-        
-        ctx.fillStyle = '#f1c40f';
-        ctx.fillRect(player.x + 6, player.y + 2, 12, 6);
-    }
-
-    function gameLoop() {
-        updatePlayer();
-        draw();
-        requestAnimationFrame(gameLoop);
-    }
-
-    function saveGame() {
-        const saveData = {
-            playerX: player.x,
-            playerY: player.y
-        };
-        localStorage.setItem('abrahancito_save', JSON.stringify(saveData));
-        alert('¡Partida guardada con éxito!');
-    }
-
-    function loadGame() {
-        const savedData = localStorage.getItem('abrahancito_save');
-        if (savedData) {
-            const data = JSON.parse(savedData);
-            player.x = data.playerX;
-            player.y = data.playerY;
-        }
-    }
-
-    function resetGame() {
-        localStorage.removeItem('abrahancito_save');
-        player.x = 100;
-        player.y = 100;
-        dialogBox.style.display = 'none';
-        alert('Progreso reiniciado.');
-    }
-
-    loadGame();
-    gameLoop();
-</script>
-
+        loadGame();
+        gameLoop();
+    </script>
 </body>
 </html>
